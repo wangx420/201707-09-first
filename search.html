@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>拖拽</title>
+  <script src="https://cdn.bootcss.com/vue/2.4.2/vue.min.js"></script>
+</head>
+<body>
+<div class="container" id="app">
+	<span class="title">demo</span>
+	<!-- 内容 -->
+	<div id="treeContainer">
+	  <textarea class="dataset-add" placeholder="文本添加框，请输入..." v-model="addName"></textarea>
+	  <button class="btn-add" @click="addFuc()">添加</button>
+	  <input class="dataset-search" type="text" placeholder="搜索框，请输入..." v-model="queryName" @keyup="searchFuc(queryName)">
+	  
+	  <!-- <input type="text" name="" v-model="addName" > -->
+	  <div class="datasourceItemSpan" v-for="(datasourceItem, index) in datasources">
+	  	<div class="item-content">
+	  		<span class="item-index">（{{index+1}}）</span>
+	  	  <span class="item-content" :id="datasourceItem.id">{{datasourceItem.content}}</span>
+	  	</div>
+	  	<div class="btnGroup">
+	  		<input type="button" class="delete" value="编辑" @click="editFuc(datasourceItem.id)">
+	  		<input type="button" class="delete" value="删除" @click="deleteFuc(datasourceItem.id)">
+	  	</div>
+	  	<div class="btnGroup btnGroup-yes-no" v-show="quest">
+	  		<input type="button" class="btn-yes" value="确认" @click="questYse(datasourceItem.id)">
+	  		<input type="button" class="btn-no" value="取消" @click="questNo(datasourceItem.id)">
+	  	</div>
+	  </div>
+	</div>
+</div>
+</body>
+<script>
+new Vue({
+  el:'#app',
+  data: {
+	  originDs: [],
+	  datasources: [
+	    {content: 'dwd_evt_cfolder_actvy_log_dmdwd_evt_cfoldeg_dmdwdd', id: 'id_87583gbdjhwgd23yr734'},
+	    {content: 'dwd_loc_persona_area_grade_ds', id: 'id_87583gbdjerrehwgd23yr734'},
+	    {content: 'dwd_cam_adv_mater_result_dm', id: 'id_87583gbdjhrtrtwgd23yr734'}
+	  ],
+		queryName: '',
+		addName: '',
+		quest: false
+  },
+  mounted () {
+  	this.$nextTick(function () {
+  		this.originDs = this.cloneArr(this.datasources)
+  		console.log(this.originDs)
+  	})
+  },
+  methods: {
+  	questYse: function (id) {
+  		this.quest = false
+  		let ids = '#' + id
+  		let el = document.querySelector(ids)
+  		el.style.borderColor = '#fff'
+  		el.setAttribute('contenteditable', false)
+  		let content = el.textContent
+  		for (var i = 0; i < this.datasources.length; i++) {
+  			if (this.datasources[i].id === id) {
+  				this.datasources[i].content = content
+  				break
+  			}
+  		}
+  		for (var j = 0; j < this.originDs.length; j++) {
+  			if (this.originDs[j].id === id) {
+  				this.originDs[j].content = content
+  				break
+  			}
+  		}
+  	},
+  	questNo: function (id) {
+  		this.quest = false
+  		let ids = '#' + id
+  		let el = document.querySelector(ids)
+  		el.style.borderColor = '#fff'
+  		el.setAttribute('contenteditable', false)
+  		let content = ''
+  		for (var i = 0; i < this.datasources.length; i++) {
+  			if (this.datasources[i].id === id) {
+  				content = this.datasources[i].content
+  				break
+  			}
+  		}
+  		el.textContent = content
+  	},
+  	editFuc: function (id) {
+  		let ids = '#' + id
+  		let el = document.querySelector(ids)
+  		el.setAttribute('contenteditable', true)
+  		el.style.borderWidth = '1px'
+  		el.style.borderColor = '#298bf1'
+  		el.style.borderStyle = 'solid'
+  		this.quest = true
+  	},
+  	addFuc: function () {
+  		let obj = {}
+  		obj.id = 'id_' + new Date().getTime()
+  		obj.content = this.addName
+  		this.datasources.unshift(obj)
+  		this.originDs.unshift(obj)
+  	},
+  	deleteFuc: function (id) {
+  		let arr = []
+  		for (var i = 0; i < this.datasources.length; i++) {
+  			if (this.datasources[i].id !== id) {
+  				arr.push(this.datasources[i])
+  			}
+  		}
+  		this.datasources = this.cloneArr(arr)
+  		let arr2 = []
+  		for (var i = 0; i < this.originDs.length; i++) {
+  			if (this.originDs[i].id !== id) {
+  				arr2.push(this.originDs[i])
+  			}
+  		}
+  		this.originDs = this.cloneArr(arr2)
+  	},
+  	searchFuc: function (content) {
+  	  if (content) {
+		  	let re = new RegExp(content, 'i')
+		  	let arr = []
+		  	for (let i = 0; i < this.originDs.length; i++) {
+		  	 if (re.test(this.originDs[i].content)) {
+		  	  	arr.push(this.originDs[i])
+		  	 }
+		    }
+		    this.datasources = this.cloneArr(arr)
+  	  } else {
+  	  	this.datasources = this.cloneArr(this.originDs)
+  	  }
+  	},
+  	// 深度克隆数组
+  	cloneArr: function (value) {
+      var arr = value
+	    var arr2 = arr.slice(0)
+	    return arr2
+  	}
+  }
+
+})
+</script>
+</html>
+<style type="text/css">
+body,html{
+	height: 100%;
+}
+.container{
+	border: 1px solid grey;
+	margin: 5px auto;
+	height: 100%;
+}
+#treeContainer{
+	float: left;
+	width: 100%;
+	height: 100%;
+	background-color: #eee;
+}
+.title{
+	background-color: #eee;
+	width: 100%;
+	display: block;
+	text-align: center;
+	height: 40px;
+	line-height: 40px;
+	margin-bottom: 10px;
+}
+.datasourceItemSpan{
+	background-color: #fff;
+	line-height: 35px;
+	font-size: 14px;
+	border-radius: 5px;
+	margin-top: 8px;
+	overflow: hidden;
+	float: left;
+	width: 98%;
+	margin-left: 1%;
+}
+
+.datasourceItemSpan div.item-content{
+	float: left;
+	display: block;
+	text-align: left;
+	width: 100%;	
+}
+.datasourceItemSpan div.item-content span{
+	float: left;
+}
+
+.datasourceItemSpan div.item-content span.item-content{
+	width: 95%;
+	display: inline-block;
+	word-break: break-word;
+}
+
+.datasourceItemSpan div.btnGroup{
+	float: left;
+	width: 40%;
+	padding-left: 30px;
+	text-align: left;
+}
+.datasourceItemSpan div.btnGroup input{
+  background-color: #fff;
+  color: blue;
+  border: none;
+  font-weight: bolder;
+}
+.datasourceItemSpan div.btnGroup input:hover{
+	cursor: pointer;
+}
+
+.dataset-search{
+	float: left;
+	width:90%;
+	height:30px;
+	line-height:30px;
+	margin-top:10px;
+	border:1px solid #dadcde;
+	border-radius:2px;
+	font-size:14px;
+	color:#36383c;
+	padding-left:34px;
+	background:url(./search.png) no-repeat 10px center;
+	box-shadow:1px 1px 2px rgba(0,0,0,.3) inset;
+	background-color: #fff;
+	margin-left: 5%;
+	margin-bottom: 15px;
+}
+.dataset-add{
+	float: left;
+  width:85%;
+	height:60px;
+	line-height:30px;
+	margin-top:10px;
+	border:1px solid #dadcde;
+	border-radius:2px;
+	font-size:14px;
+	color:#36383c;
+	box-shadow:1px 1px 2px rgba(0,0,0,.3) inset;
+	background-color: #fff;
+	margin-left: 5%;
+	margin-bottom: 20px;
+}
+.btn-add{
+	float: left;
+	background-color: #448bf5;
+	border: 1px solid #093e8f;
+	width: 80px;
+	height: 64px;
+	margin: 10px 0 0 10px;
+	color: #e7e7e7;
+	font-size: 20px;
+	border-radius: 5px;
+	letter-spacing: 8px;
+	font-weight: bolder;
+}
+.btnGroup-yes-no{
+	float: right!important;
+	text-align: right!important;
+	padding-right: 50px;
+}
+</style>
+
